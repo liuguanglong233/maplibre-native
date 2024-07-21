@@ -442,7 +442,9 @@ void TransformState::setEdgeInsets(const EdgeInsets& val) {
 // MARK: - Position
 
 LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
-    return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * M_PI), -x / Bc, wrapMode};
+    // return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * M_PI), -x / Bc, wrapMode};
+    // TDT-ZJ
+    return {(y * util::RAD2DEG_D / Cc) - 90, -x / Bc, wrapMode};
 }
 
 double TransformState::pixel_x() const {
@@ -784,12 +786,18 @@ void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
     Bc = newWorldSize / util::DEGREES_MAX;
     Cc = newWorldSize / util::M2PI;
 
-    const double m = 1 - 1e-15;
-    const double f = util::clamp(std::sin(util::deg2rad(constrained.latitude())), -m, m);
+    // const double m = 1 - 1e-15;
+    // const double f = util::clamp(std::sin(util::deg2rad(constrained.latitude())), -m, m);
 
+    // ScreenCoordinate point = {
+    //     -constrained.longitude() * Bc,
+    //     0.5 * Cc * std::log((1 + f) / (1 - f)),
+    // };
+    
+    // TDT-ZJ
     ScreenCoordinate point = {
-        -constrained.longitude() * Bc,
-        0.5 * Cc * std::log((1 + f) / (1 - f)),
+            -constrained.longitude() * Bc,
+            (90 + constrained.latitude()) * util::DEG2RAD_D * Cc,
     };
     setScalePoint(newScale, point);
 }

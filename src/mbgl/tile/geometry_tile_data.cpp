@@ -126,8 +126,10 @@ Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFe
     const double y0 = util::EXTENT * static_cast<double>(tileID.y);
 
     auto tileCoordinatesToLatLng = [&](const Point<int16_t>& p) {
-        double y2 = 180 - (p.y + y0) * 360 / size;
-        return Point<double>((p.x + x0) * 360 / size - 180, std::atan(std::exp(y2 * M_PI / 180)) * 360.0 / M_PI - 90.0);
+        // double y2 = 180 - (p.y + y0) * 360 / size;
+        // return Point<double>((p.x + x0) * 360 / size - 180, std::atan(std::exp(y2 * M_PI / 180)) * 360.0 / M_PI - 90.0);
+        // TDT-ZJ
+        return Point<double>((p.x + x0) * 360 / size - 180,90.0 - (p.y + y0) * 360 / size);
     };
 
     const GeometryCollection& geometries = geometryTileFeature.getGeometries();

@@ -54,24 +54,27 @@ public:
         const double constrainedLatitude = util::clamp(latLng.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
         const double constrainedLongitude = util::clamp(latLng.longitude(), -util::LONGITUDE_MAX, util::LONGITUDE_MAX);
 
-        const double m = 1 - 1e-15;
-        const double f = util::clamp(std::sin(util::deg2rad(constrainedLatitude)), -m, m);
+        // const double m = 1 - 1e-15;
+        // const double f = util::clamp(std::sin(util::deg2rad(constrainedLatitude)), -m, m);
 
         const double easting = util::deg2rad(util::EARTH_RADIUS_M * constrainedLongitude);
-        const double northing = 0.5 * util::EARTH_RADIUS_M * std::log((1 + f) / (1 - f));
-
-        return {northing, easting};
+        // const double northing = 0.5 * util::EARTH_RADIUS_M * std::log((1 + f) / (1 - f));
+        // TDT_ZJ
+        const double northing = (util::LATITUDE_MAX - constrainedLatitude) * util::DEG2RAD_D;
+        return ProjectedMeters(northing, easting);
     }
 
     static LatLng latLngForProjectedMeters(const ProjectedMeters& projectedMeters) {
-        double latitude = util::rad2deg(2 * std::atan(std::exp(projectedMeters.northing() / util::EARTH_RADIUS_M)) -
-                                        (M_PI / 2.0));
-        double longitude = util::rad2deg(projectedMeters.easting()) / util::EARTH_RADIUS_M;
+        // double latitude = util::rad2deg(2 * std::atan(std::exp(projectedMeters.northing() / util::EARTH_RADIUS_M)) - (M_PI / 2.0));
+        // double longitude = util::rad2deg(projectedMeters.easting()) / util::EARTH_RADIUS_M;
+        //TDT_ZJ
+        double latitude = util::LATITUDE_MAX - (projectedMeters.northing() * util::RAD2DEG_D);
+        double longitude = projectedMeters.easting() * util::RAD2DEG_D / util::EARTH_RADIUS_M;
 
         latitude = util::clamp(latitude, -util::LATITUDE_MAX, util::LATITUDE_MAX);
         longitude = util::clamp(longitude, -util::LONGITUDE_MAX, util::LONGITUDE_MAX);
 
-        return {latitude, longitude};
+        return LatLng(latitude, longitude);
     }
 
     static Point<double> project(const LatLng& latLng, double scale) noexcept {
@@ -83,18 +86,25 @@ public:
 
     static LatLng unproject(const Point<double>& p, double scale, LatLng::WrapMode wrapMode = LatLng::Unwrapped) {
         auto p2 = p * util::DEGREES_MAX / worldSize(scale);
-        return LatLng{std::atan(std::exp(util::deg2rad(util::LONGITUDE_MAX - p2.y))) * util::DEGREES_MAX / M_PI - 90.0,
-                      p2.x - util::LONGITUDE_MAX,
-                      wrapMode};
+        // return LatLng{std::atan(std::exp(util::deg2rad(util::LONGITUDE_MAX - p2.y))) * util::DEGREES_MAX / M_PI - 90.0, p2.x - util::LONGITUDE_MAX, wrapMode};
+        //TDT_ZJ
+        double lat = util::LATITUDE_MAX - p.y * util::LONGITUDE_MAX / (worldSize(scale) / 2);
+        lat = util::clamp(lat, -util::LATITUDE_MAX, util::LATITUDE_MAX);
+        return LatLng{lat, p2.x - util::LONGITUDE_MAX, wrapMode};
     }
 
 private:
     static Point<double> project_(const LatLng& latLng, double worldSize) noexcept {
-        const double latitude = util::clamp(latLng.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
-        return Point<double>{util::LONGITUDE_MAX + latLng.longitude(),
-                             util::LONGITUDE_MAX -
-                                 util::rad2deg(std::log(std::tan(M_PI / 4 + latitude * M_PI / util::DEGREES_MAX)))} *
-               (worldSize / util::DEGREES_MAX);
+        // const double latitude = util::clamp(latLng.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
+        // return Point<double>{util::LONGITUDE_MAX + latLng.longitude(),
+        //                      util::LONGITUDE_MAX -
+        //                          util::rad2deg(std::log(std::tan(M_PI / 4 + latitude * M_PI / util::DEGREES_MAX)))} *
+        //        (worldSize / util::DEGREES_MAX);
+        //TDT_ZJ
+        return Point<double> {
+                util::LONGITUDE_MAX + latLng.longitude(),
+                double(util::LATITUDE_MAX - latLng.latitude())
+        } * worldSize / util::DEGREES_MAX;
     }
 };
 
