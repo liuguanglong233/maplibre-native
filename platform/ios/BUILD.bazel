@@ -177,6 +177,8 @@ _IOS_APPLICATION_RESOURCES = [
     "app/simple_route.json",
     "app/fill_filter_style.json",
     "//platform/darwin:test/amsterdam.geojson",
+    "app/mapSources/img.json",      # 浙江天地图栅格地图资源文件
+    "app/mapSources/tdt-emap.json", # 浙江天地图矢量地图资源文件
 ] + glob([
     "app/*.lproj/**",
     "app/Assets.xcassets/**",
@@ -191,7 +193,7 @@ ios_application(
     ],
     infoplists = ["info_app_plist"],
     minimum_os_version = "12.0",
-    provisioning_profile = "xcode_profile",
+    provisioning_profile = "9b68e2bb-8329-42b3-abff-dfdf52d65ead.mobileprovision",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
@@ -211,7 +213,7 @@ ios_application(
     ],
     infoplists = ["app/Info.plist"],
     minimum_os_version = "12.0",
-    provisioning_profile = ":xcode_profile",
+    provisioning_profile = "9b68e2bb-8329-42b3-abff-dfdf52d65ead.mobileprovision",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
@@ -228,7 +230,7 @@ ios_application(
     ],
     infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
     minimum_os_version = "12.0",
-    provisioning_profile = "xcode_profile",
+    provisioning_profile = "9b68e2bb-8329-42b3-abff-dfdf52d65ead.mobileprovision",
     resources = [
         "//platform/ios/benchmark:bundle_resources",
         "//platform/ios/benchmark/assets:benchmark_assets",

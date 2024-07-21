@@ -1,3 +1,4 @@
+#include <Foundation/Foundation.h>
 #import "Mapbox.h"
 
 #import "MBXViewController.h"
@@ -495,10 +496,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             switch (indexPath.row)
             {
                 case MBXSettingsDebugToolsResetPosition:
-                    [self.mapView resetPosition];
+                    [self lglSetCenterAndZoom];
                     break;
                 case MBXSettingsDebugToolsTileBoundaries:
-                    self.currentState.debugMask ^= MLNMapDebugTileBoundariesMask;
+                    [self lglAddCircle];
                     break;
                 case MBXSettingsDebugToolsTileInfo:
                     self.currentState.debugMask ^= MLNMapDebugTileInfoMask;
@@ -2150,7 +2151,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
+    NSURL *vectorURL = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"tdt-emap" ofType:@"json"]];
+    NSURL *rasterURL = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"img" ofType:@"json"]];
+    [self.styleURLs addObject:rasterURL];
+    // [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
@@ -2167,6 +2171,47 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
     
     NSAssert(self.styleNames.count == self.styleURLs.count, @"Style names and URLs don’t match.");
+}
+
+- (void)lglAddCircle {
+    // 设置缩放级别
+    [self.mapView setZoomLevel:7 animated:YES];
+    // 设置坐标 (30, 120.5) 为视图中心点
+    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(30, 120.5);
+    [self.mapView setCenterCoordinate:centerCoordinate animated:YES];
+    // 创建圆形覆盖物
+    [self addCircleAtCoordinate:centerCoordinate];
+}
+
+- (void)lglSetCenterAndZoom
+{
+    [self.mapView setZoomLevel:7 animated:YES];
+    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(30, 120.5);
+    [self.mapView setCenterCoordinate:centerCoordinate animated:YES];
+}
+
+- (void)addCircleAtCoordinate:(CLLocationCoordinate2D)coordinate {
+    // 创建数据源
+    NSDictionary *geoJSON = @{
+        @"type": @"Feature",
+        @"geometry": @{
+            @"type": @"Point",
+            @"coordinates": @[@(coordinate.longitude), @(coordinate.latitude)]
+        }
+    };
+    NSData *geoJSONData = [NSJSONSerialization dataWithJSONObject:geoJSON options:0 error:nil];
+    MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"circleSource" shape:[MLNShape shapeWithData:geoJSONData encoding:NSUTF8StringEncoding error:nil] options:nil];
+    [self.mapView.style addSource:source];
+    
+    // 创建并添加圆形样式图层
+    MLNCircleStyleLayer *circleLayer = [[MLNCircleStyleLayer alloc] initWithIdentifier:@"circleLayer" source:source];
+    circleLayer.circleColor = [NSExpression expressionForConstantValue:[UIColor blueColor]];
+    circleLayer.circleRadius = [NSExpression expressionForConstantValue:@50];
+    [self.mapView.style addLayer:circleLayer];
+}
+
+- (void)mapViewDidFinishLoadingMap: (MLNMapView *)mapView
+{
 }
 
 - (IBAction)cycleStyles:(__unused id)sender

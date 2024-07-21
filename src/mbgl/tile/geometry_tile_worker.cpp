@@ -410,6 +410,11 @@ void GeometryTileWorker::parse() {
         const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
         BucketParameters parameters{id, mode, pixelRatio, leaderImpl.getTypeInfo()};
 
+        //TDT_ZJ
+        if (std::strcmp(leaderImpl.sourceLayer.c_str(), "aox1l") == 0 && (id.canonical.x + id.canonical.y) % 2 != 0) {
+            continue;
+        }
+
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {
             continue;

@@ -9,6 +9,24 @@
 
 namespace mbgl {
 
+// TDT_ZJ
+static std::string getDate() {
+    time_t timep;
+    time(&timep);
+    char tmp[64];
+    strftime(tmp, sizeof(tmp), "%Y%m%d", localtime(&timep));
+    return tmp;
+}
+
+// TDT_ZJ
+static std::string getDate2() {
+    time_t timep;
+    time(&timep);
+    char tmp[64];
+    strftime(tmp, sizeof(tmp), "%Y%m%d%H%M", localtime(&timep));
+    return tmp;
+}
+
 static std::string getQuadKey(int32_t x, int32_t y, int8_t z) {
     std::string quadKey;
     quadKey.reserve(z);
@@ -20,23 +38,34 @@ static std::string getQuadKey(int32_t x, int32_t y, int8_t z) {
     return quadKey;
 }
 
-static mapbox::geometry::point<double> getMercCoord(int32_t x, int32_t y, int8_t z) {
-    double resolution = (util::M2PI * util::EARTH_RADIUS_M / 256) / std::pow(2, z);
-    return {
-        x * resolution - util::M2PI * util::EARTH_RADIUS_M / 2,
-        y * resolution - util::M2PI * util::EARTH_RADIUS_M / 2,
-    };
+// static mapbox::geometry::point<double> getMercCoord(int32_t x, int32_t y, int8_t z) {
+//     double resolution = (util::M2PI * util::EARTH_RADIUS_M / 256) / std::pow(2, z);
+//     return {
+//         x * resolution - util::M2PI * util::EARTH_RADIUS_M / 2,
+//         y * resolution - util::M2PI * util::EARTH_RADIUS_M / 2,
+//     };
+// }
+
+//TDT_ZJ
+static mapbox::geometry::point<double> getWgsCoord(int32_t x, int32_t y, int8_t z) {
+    double resolution = util::LONGITUDE_MAX / std::pow(2, z - 1);
+
+    return {util::LONGITUDE_MAX - (util::DEGREES_MAX - resolution * x),util::LATITUDE_MAX - resolution * y};
 }
 
 static std::string getTileBBox(int32_t x, int32_t y, int8_t z) {
     // Alter the y for the Google/OSM tile scheme.
-    y = static_cast<int32_t>(std::pow(2, z)) - y - 1;
+    // y = static_cast<int32_t>(std::pow(2, z)) - y - 1;
 
-    auto min = getMercCoord(x * 256, y * 256, z);
-    auto max = getMercCoord((x + 1) * 256, (y + 1) * 256, z);
+    // auto min = getMercCoord(x * 256, y * 256, z);
+    // auto max = getMercCoord((x + 1) * 256, (y + 1) * 256, z);
 
-    return (util::toString(min.x) + "," + util::toString(min.y) + "," + util::toString(max.x) + "," +
-            util::toString(max.y));
+    // return (util::toString(min.x) + "," + util::toString(min.y) + "," + util::toString(max.x) + "," + util::toString(max.y));
+    // TDT_ZJ
+    auto min = getWgsCoord(x, y, z);
+    auto max = getWgsCoord((x + 1), (y + 1), z);
+
+    return (util::toString(min.x) + "," + util::toString(max.y) + "," + util::toString(max.x) + "," + util::toString(min.y));
 }
 
 Resource Resource::style(const std::string& url) {
@@ -100,6 +129,10 @@ Resource Resource::tile(const std::string& urlTemplate,
                                                 return util::toString(x);
                                             } else if (token == "y") {
                                                 return util::toString(y);
+                                            } else if (token == "v") {
+                                                return getDate();
+                                            } else if (token == "date") {
+                                                return getDate2();
                                             } else if (token == "quadkey") {
                                                 return getQuadKey(x, y, z);
                                             } else if (token == "bbox-epsg-3857") {

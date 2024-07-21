@@ -12,8 +12,10 @@ namespace mbgl {
 namespace {
 
 double lat_(const uint8_t z, const int64_t y) noexcept {
-    const double n = M_PI - 2.0 * M_PI * y / std::pow(2.0, z);
-    return util::rad2deg(std::atan(0.5 * (std::exp(n) - std::exp(-n))));
+    // const double n = M_PI - 2.0 * M_PI * y / std::pow(2.0, z);
+    // return util::rad2deg(std::atan(0.5 * (std::exp(n) - std::exp(-n))));
+    // TDT-ZJ
+    return util::LATITUDE_MAX - y * util::DEGREES_MAX / std::pow(2.0, z);
 }
 
 double lon_(const uint8_t z, const int64_t x) noexcept {
