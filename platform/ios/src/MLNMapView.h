@@ -115,6 +115,12 @@ typedef NS_ENUM(NSUInteger, MLNPanScrollingMode) {
   MLNPanScrollingModeDefault
 };
 
+// 投影类型枚举类
+typedef NS_ENUM(NSInteger, ProjectionType) {
+    LonLatProjection = 0,
+    MercatorProjection = 1
+};
+
 /** Options for `MLNMapView.preferredFramesPerSecond`. */
 typedef NSInteger MLNMapViewPreferredFramesPerSecond NS_TYPED_EXTENSIBLE_ENUM;
 
@@ -205,6 +211,16 @@ MLN_EXPORT
  - TODO: how to initialize an `MLNMapView` with a third-party tile source
  */
 - (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL;
+
+// TDT-ZJ
+/**
+ 初始化地图并设置地图投影类型
+
+ @param frame 视图的框架，以点为单位。
+ @param projectionType 地图投影类型，默认为经纬度直投，可选墨卡托投影。
+ @return 已经完成初始化的map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame projectionType:(ProjectionType)projectionType;
 
 // MARK: Accessing the Delegate
 

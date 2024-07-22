@@ -522,6 +522,35 @@ public:
     return self;
 }
 
+// TDT-ZJ
+// 初始化mapview与地图投影类型。
+- (instancetype)initWithFrame:(CGRect)frame projectionType:(ProjectionType)projectionType
+{
+    if (self = [super initWithFrame:frame])
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ projectionType: %@", NSStringFromCGRect(frame), projectionType);
+        [self commonInit];
+        self.styleURL = nil;
+        switch(projectionType) {
+        case LON_LAT_PROJECTION:
+            mbgl::util:projectionType = mbgl::util::ProjectionType::LON_LAT_PROJECTION;
+            MLNLogInfo(@"已设置经纬度直投。");
+            break;
+        case MercatorProjection:
+            mbgl::util:projectionType = mbgl::util::ProjectionType::MERCATOR_PROJECTION;
+            MLNLogInfo(@"已设置墨卡托投影。");
+            break;
+        default:
+            mbgl::util:projectionType = mbgl::util::ProjectionType::LON_LAT_PROJECTION;
+            MLNLogInfo(@"默认：已设置经纬度直投。");
+            break;
+    }
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
 - (instancetype)initWithCoder:(nonnull NSCoder *)decoder
 {
     if (self = [super initWithCoder:decoder])

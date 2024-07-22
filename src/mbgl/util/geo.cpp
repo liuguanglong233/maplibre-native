@@ -12,10 +12,14 @@ namespace mbgl {
 namespace {
 
 double lat_(const uint8_t z, const int64_t y) noexcept {
-    // const double n = M_PI - 2.0 * M_PI * y / std::pow(2.0, z);
-    // return util::rad2deg(std::atan(0.5 * (std::exp(n) - std::exp(-n))));
     // TDT-ZJ
-    return util::LATITUDE_MAX - y * util::DEGREES_MAX / std::pow(2.0, z);
+    //  检查投影类型是否是墨卡托投影，如果不是就默认执行经纬度直投。
+    if (mbgl::util::projectionType == mbgl::util::ProjectionType::MERCATOR_PROJECTION) {
+        const double n = M_PI - 2.0 * M_PI * y / std::pow(2.0, z);
+        return util::rad2deg(std::atan(0.5 * (std::exp(n) - std::exp(-n))));
+    } else {
+        return util::LATITUDE_MAX - y * util::DEGREES_MAX / std::pow(2.0, z);
+    }
 }
 
 double lon_(const uint8_t z, const int64_t x) noexcept {

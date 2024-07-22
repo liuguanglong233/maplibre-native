@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <cstddef>
+#include "projection.hpp"
 
 namespace mbgl {
 
@@ -30,9 +31,22 @@ constexpr double DEG2RAD_D = M_PI / 180.0;
 constexpr double RAD2DEG_D = 180.0 / M_PI;
 constexpr double M2PI = M_PI * 2;
 constexpr double EARTH_RADIUS_M = 6378137;
-// constexpr double LATITUDE_MAX = 85.051128779806604;
 // TDT_ZJ
-constexpr double LATITUDE_MAX = 90;
+// 两种投影类型
+enum class ProjectionType {
+    LON_LAT_PROJECTION = 0,
+    MERCATOR_PROJECTION = 1
+};
+
+// 标识投影类型的变量，默认为经纬度直投，整个生命周期内应该最多被修改一次。
+ProjectionType projectionType = ProjectionType::LON_LAT_PROJECTION;
+
+// 检查投影类型是否是墨卡托投影，如果不是就默认执行经纬度直投。
+if (mbgl::util::projectionType == mbgl::util::ProjectionType::MERCATOR_PROJECTION) {
+    const double LATITUDE_MAX = 85.051128779806604;
+} else {
+    const double LATITUDE_MAX = 90;
+}
 constexpr double LONGITUDE_MAX = 180;
 constexpr double DEGREES_MAX = 360;
 constexpr double PITCH_MIN = 0.0;

@@ -126,10 +126,15 @@ Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFe
     const double y0 = util::EXTENT * static_cast<double>(tileID.y);
 
     auto tileCoordinatesToLatLng = [&](const Point<int16_t>& p) {
-        // double y2 = 180 - (p.y + y0) * 360 / size;
-        // return Point<double>((p.x + x0) * 360 / size - 180, std::atan(std::exp(y2 * M_PI / 180)) * 360.0 / M_PI - 90.0);
         // TDT-ZJ
-        return Point<double>((p.x + x0) * 360 / size - 180,90.0 - (p.y + y0) * 360 / size);
+        //  检查投影类型是否是墨卡托投影，如果不是就默认执行经纬度直投。
+        if (mbgl::util::projectionType == mbgl::util::ProjectionType::MERCATOR_PROJECTION) {
+            double y2 = 180 - (p.y + y0) * 360 / size;
+            return Point<double>((p.x + x0) * 360 / size - 180,
+                                 std::atan(std::exp(y2 * M_PI / 180)) * 360.0 / M_PI - 90.0);
+        } else {
+            return Point<double>((p.x + x0) * 360 / size - 180, 90.0 - (p.y + y0) * 360 / size);
+        }
     };
 
     const GeometryCollection& geometries = geometryTileFeature.getGeometries();

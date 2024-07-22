@@ -411,7 +411,7 @@ void GeometryTileWorker::parse() {
         BucketParameters parameters{id, mode, pixelRatio, leaderImpl.getTypeInfo()};
 
         //TDT_ZJ
-        if (std::strcmp(leaderImpl.sourceLayer.c_str(), "aox1l") == 0 && (id.canonical.x + id.canonical.y) % 2 != 0) {
+        if ((mbgl::util::projectionType == mbgl::util::ProjectionType::MERCATOR_PROJECTION) && std::strcmp(leaderImpl.sourceLayer.c_str(), "aox1l") == 0 && (id.canonical.x + id.canonical.y) % 2 != 0) {
             continue;
         }
 
