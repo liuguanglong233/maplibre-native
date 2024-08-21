@@ -522,6 +522,36 @@ public:
     return self;
 }
 
+// TDT-ZJ
+// 初始化mapview与地图投影类型。
+- (instancetype)initWithFrame:(CGRect)frame projectionType:(ProjectionType)projectionType 
+{
+    if (self = [super initWithFrame:frame]) 
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ projectionType: %@", NSStringFromCGRect(frame), projectionType);
+        switch (projectionType) {
+            case LonLatProjection:
+              mbgl::util::projectionType = mbgl::util::ProjectionType::LON_LAT_PROJECTION;
+              MLNLogInfo(@"已设置经纬度直投。");
+              break;
+            case MercatorProjection:
+              mbgl::util::projectionType = mbgl::util::ProjectionType::MERCATOR_PROJECTION;
+              MLNLogInfo(@"已设置墨卡托投影。");
+              break;
+            default:
+              mbgl::util::projectionType = mbgl::util::ProjectionType::LON_LAT_PROJECTION;
+              MLNLogInfo(@"默认：已设置经纬度直投。");
+              break;
+        }
+        mbgl::util::setLatitudeMax();
+        [self commonInit];
+        self.styleURL = nil;
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
 - (instancetype)initWithCoder:(nonnull NSCoder *)decoder
 {
     if (self = [super initWithCoder:decoder])
@@ -689,8 +719,6 @@ public:
     // the UIViewController api.
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSLog(@"%@ WARNING UIViewController.automaticallyAdjustsScrollViewInsets is deprecated use MLNMapView.automaticallyAdjustContentInset instead.",
-        NSStringFromClass(self.class));
     });
 
     // setup logo

@@ -9,6 +9,7 @@
 
 namespace mbgl {
 
+
 // TDT_ZJ
 static std::string getDate() {
     time_t timep;
@@ -38,13 +39,13 @@ static std::string getQuadKey(int32_t x, int32_t y, int8_t z) {
     return quadKey;
 }
 
-// static mapbox::geometry::point<double> getMercCoord(int32_t x, int32_t y, int8_t z) {
-//     double resolution = (util::M2PI * util::EARTH_RADIUS_M / 256) / std::pow(2, z);
-//     return {
-//         x * resolution - util::M2PI * util::EARTH_RADIUS_M / 2,
-//         y * resolution - util::M2PI * util::EARTH_RADIUS_M / 2,
-//     };
-// }
+static mapbox::geometry::point<double> getMercCoord(int32_t x, int32_t y, int8_t z) {
+    double resolution = (util::M2PI * util::EARTH_RADIUS_M / 256) / std::pow(2, z);
+    return {
+        x * resolution - util::M2PI * util::EARTH_RADIUS_M / 2,
+        y * resolution - util::M2PI * util::EARTH_RADIUS_M / 2,
+    };
+}
 
 //TDT_ZJ
 static mapbox::geometry::point<double> getWgsCoord(int32_t x, int32_t y, int8_t z) {
@@ -54,18 +55,24 @@ static mapbox::geometry::point<double> getWgsCoord(int32_t x, int32_t y, int8_t 
 }
 
 static std::string getTileBBox(int32_t x, int32_t y, int8_t z) {
-    // Alter the y for the Google/OSM tile scheme.
-    // y = static_cast<int32_t>(std::pow(2, z)) - y - 1;
+    // TDT-ZJ
+    //  检查投影类型是否是墨卡托投影，如果不是就默认执行经纬度直投。
+    if (mbgl::util::projectionType == mbgl::util::ProjectionType::MERCATOR_PROJECTION) {
+        // Alter the y for the Google/OSM tile scheme.
+        y = static_cast<int32_t>(std::pow(2, z)) - y - 1;
 
-    // auto min = getMercCoord(x * 256, y * 256, z);
-    // auto max = getMercCoord((x + 1) * 256, (y + 1) * 256, z);
+        auto min = getMercCoord(x * 256, y * 256, z);
+        auto max = getMercCoord((x + 1) * 256, (y + 1) * 256, z);
 
-    // return (util::toString(min.x) + "," + util::toString(min.y) + "," + util::toString(max.x) + "," + util::toString(max.y));
-    // TDT_ZJ
-    auto min = getWgsCoord(x, y, z);
-    auto max = getWgsCoord((x + 1), (y + 1), z);
+        return (util::toString(min.x) + "," + util::toString(min.y) + "," + util::toString(max.x) + "," +
+        util::toString(max.y));
+    } else {
+        auto min = getWgsCoord(x, y, z);
+        auto max = getWgsCoord((x + 1), (y + 1), z);
 
-    return (util::toString(min.x) + "," + util::toString(max.y) + "," + util::toString(max.x) + "," + util::toString(min.y));
+        return (util::toString(min.x) + "," + util::toString(max.y) + "," + util::toString(max.x) + "," +
+                util::toString(min.y));
+    }
 }
 
 Resource Resource::style(const std::string& url) {
